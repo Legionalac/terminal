@@ -1,6 +1,7 @@
+import React from 'react';
 import './App.css';
 import Line from './components/main-screen/line';
-function App() {
+const App : React.FC = () => {
 	return (
 		<div >
 			<Line />

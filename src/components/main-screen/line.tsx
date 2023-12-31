@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import React , { ChangeEvent, useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
 import "./line.css";
-function Line() {
+const Line :React.FC = () => {
 	let [path, setPath] = useState("");
 	let [inputSize, setInputSize] = useState(1);
 	let [input, setTextAreaInput] = useState("");
@@ -11,7 +11,7 @@ function Line() {
 		path = await invoke("getCurrentLocation");
 		setPath(path);
 	};
-	const parseCommand = async (input) => {
+	const parseCommand = async (input : String) => {
 		let response = await invoke("commandParser", { input: input });
 		return response;
 	};
@@ -19,7 +19,7 @@ function Line() {
 		getPath();
 	});
 
-	const checkForCommand = async (event) => {
+	const checkForCommand = async (event: ChangeEvent<HTMLTextAreaElement>) => {
 		setTextAreaInput(event.target.value);
 		let input = event.target.value;
 		if (input.charAt(input.length - 1) === "\n") {
