@@ -1,45 +1,49 @@
-import React , { ChangeEvent, useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
 import "./line.css";
-const Line :React.FC = () => {
+import {
+	checkForCommand,
+	getPath,
+	useAutosizeTextArea,
+} from "../../libs/helperMethods";
+const Line: React.FC = () => {
 	let [path, setPath] = useState("");
-	let [inputSize, setInputSize] = useState(1);
 	let [input, setTextAreaInput] = useState("");
+	let [history, setTextAreaHistory] = useState("");
+	const textAreaRef = useRef<HTMLTextAreaElement>(null);
+	const historyRef = useRef<HTMLTextAreaElement>(null);
+	useAutosizeTextArea(textAreaRef.current, input);
+	useAutosizeTextArea(historyRef.current, history);
 
-	// FUNCTIONS FOR GETTING PATH
-	const getPath = async () => {
-		path = await invoke("getCurrentLocation");
-		setPath(path);
-	};
-	const parseCommand = async (input : String) => {
-		let response = await invoke("commandParser", { input: input });
-		return response;
-	};
 	useEffect(() => {
-		getPath();
+		getPath(setPath);
 	});
 
-	const checkForCommand = async (event: ChangeEvent<HTMLTextAreaElement>) => {
-		setTextAreaInput(event.target.value);
-		let input = event.target.value;
-		if (input.charAt(input.length - 1) === "\n") {
-			setTextAreaInput("");
-			let response = await parseCommand(input);
-			console.log(response);
-		}
+	const handleInput = (event: ChangeEvent<HTMLTextAreaElement>) => {
+		checkForCommand(event, setTextAreaInput, setTextAreaHistory);
 	};
 	return (
-		<div style={{ display: "flex", flexDirection: "row", width: "100%" }}>
-			<label style={{ flex: "0 0 auto", marginRight: "10px" }}>
-				{`${path} > `}{" "}
-			</label>
+		<div>
 			<textarea
-				value={input}
-				style={{ width: "100%", resize: "none" }}
-				rows={inputSize}
-				onChange={checkForCommand}
+				value={history}
+				style={{ width: "100%", resize: "none", height: "auto" }}
+				ref={historyRef}
+				readOnly
 			></textarea>
+			<div
+				style={{ display: "flex", flexDirection: "row", width: "100%" }}
+			>
+				<label style={{ flex: "0 0 auto", marginRight: "10px" }}>
+					{`${path} > `}{" "}
+				</label>
+				<textarea
+					value={input}
+					style={{ width: "100%", resize: "none", height: "auto" }}
+					onChange={handleInput}
+					ref={textAreaRef}
+				></textarea>
+			</div>
 		</div>
 	);
-}
+};
 export default Line;
